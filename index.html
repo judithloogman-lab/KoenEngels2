@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oefentool Engels: The Holidays</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f0f2f5; color: #333; margin: 0; padding: 20px; display: flex; justify-content: center; }
+        .card { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); max-width: 500px; width: 100%; }
+        h1 { color: #1a5f7a; font-size: 24px; text-align: center; margin-bottom: 10px; }
+        p.subtitle { text-align: center; color: #666; margin-bottom: 30px; }
+        .menu-btns, .quiz-area { display: flex; flex-direction: column; gap: 12px; }
+        button { padding: 12px; border: none; border-radius: 6px; cursor: pointer; font-size: 16px; transition: background 0.3s; }
+        .btn-primary { background-color: #1a5f7a; color: white; }
+        .btn-primary:hover { background-color: #13495f; }
+        .btn-secondary { background-color: #e7e7e7; color: #333; }
+        input[type="text"] { padding: 12px; border: 2px solid #ddd; border-radius: 6px; font-size: 18px; outline: none; }
+        input[type="text"]:focus { border-color: #1a5f7a; }
+        .feedback { margin-top: 15px; padding: 15px; border-radius: 6px; font-weight: bold; display: none; text-align: center; }
+        .correct { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .incorrect { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .stats { margin-top: 20px; display: flex; justify-content: space-between; font-size: 14px; color: #777; border-top: 1px solid #eee; padding-top: 15px; }
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h1>The Holidays (Havo/Vwo 1)</h1>
+    <p class="subtitle">Vertaal de woorden en zinnen</p>
+
+    <div id="menu" class="menu-btns">
+        <button class="btn-primary" onclick="startQuiz('en-nl')">Engels -> Nederlands</button>
+        <button class="btn-primary" onclick="startQuiz('nl-en')">Nederlands -> Engels</button>
+    </div>
+
+    <div id="quiz" class="hidden">
+        <div class="quiz-area">
+            <small id="category-label" style="color: #1a5f7a; font-weight: bold; text-transform: uppercase;"></small>
+            <h2 id="word-display" style="margin: 10px 0;"></h2>
+            <input type="text" id="answer-input" placeholder="Typ je antwoord..." autocomplete="off">
+            <button class="btn-primary" onclick="checkAnswer()">Controleer</button>
+            <div id="feedback" class="feedback"></div>
+            <button class="btn-secondary" onclick="location.reload()">Stoppen</button>
+        </div>
+        <div class="stats">
+            <span>Voortgang: <span id="progress">0</span> / <span id="total">0</span></span>
+            <span>Score: <span id="score">0</span></span>
+        </div>
+    </div>
+</div>
+
+<script>
+    const wordList = [
+        // Part A - Thanksgiving
+        {en: "annual", nl: "jaarlijks", cat: "Thanksgiving"},
+        {en: "grateful", nl: "dankbaar", cat: "Thanksgiving"},
+        {en: "harvest", nl: "oogst", cat: "Thanksgiving"},
+        {en: "to celebrate", nl: "vieren", cat: "Thanksgiving"},
+        {en: "to get together", nl: "samenkomen", cat: "Thanksgiving"},
+        {en: "nowadays", nl: "tegenwoordig", cat: "Thanksgiving"},
+        
+        // Part B - Christmas
+        {en: "Christmas Eve", nl: "kerstavond", cat: "Christmas"},
+        {en: "reindeer", nl: "rendier", cat: "Christmas"},
+        {en: "to decorate", nl: "versieren", cat: "Christmas"},
+        {en: "stocking", nl: "sok", cat: "Christmas"},
+        {en: "naughty", nl: "stout", cat: "Christmas"},
+        {en: "meaning", nl: "betekenis", cat: "Christmas"},
+        
+        // Part C - New Year
+        {en: "midnight", nl: "middernacht", cat: "New Year"},
+        {en: "New Year's resolutions", nl: "goede voornemens", cat: "New Year"},
+        {en: "to sleep in", nl: "uitslapen", cat: "New Year"},
+        {en: "afterwards", nl: "na de tijd", cat: "New Year"},
+        {en: "honestly", nl: "eerlijk gezegd", cat: "New Year"},
+        
+        // Question Words & Tenses
+        {en: "whose", nl: "van wie", cat: "Grammar"},
+        {en: "which", nl: "welke", cat: "Grammar"},
+        {en: "I am going to celebrate", nl: "ik ga vieren", cat: "Tenses"}
+    ];
+
+    let currentMode = '';
+    let shuffledList = [];
+    let currentIndex = 0;
+    let score = 0;
+
+    function startQuiz(mode) {
+        currentMode = mode;
+        shuffledList = [...wordList].sort(() => Math.random() - 0.5);
+        document.getElementById('menu').classList.add('hidden');
+        document.getElementById('quiz').classList.remove('hidden');
+        document.getElementById('total').innerText = shuffledList.length;
+        displayWord();
+    }
+
+    function displayWord() {
+        const item = shuffledList[currentIndex];
+        document.getElementById('category-label').innerText = item.cat;
+        document.getElementById('word-display').innerText = currentMode === 'en-nl' ? item.en : item.nl;
+        document.getElementById('answer-input').value = '';
+        document.getElementById('answer-input').focus();
+        document.getElementById('feedback').classList.add('hidden');
+    }
+
+    function checkAnswer() {
+        const input = document.getElementById('answer-input').value.trim().toLowerCase();
+        const item = shuffledList[currentIndex];
+        const correct = currentMode === 'en-nl' ? item.nl.toLowerCase() : item.en.toLowerCase();
+        const feedbackDiv = document.getElementById('feedback');
+
+        if (input === correct) {
+            feedbackDiv.innerText = "Correct! Goed gedaan.";
+            feedbackDiv.className = "feedback correct";
+            score++;
+        } else {
+            feedbackDiv.innerText = "Helaas. Het juiste antwoord is: " + correct;
+            feedbackDiv.className = "feedback incorrect";
+        }
+
+        feedbackDiv.classList.remove('hidden');
+        document.getElementById('score').innerText = score;
+        currentIndex++;
+        document.getElementById('progress').innerText = currentIndex;
+
+        setTimeout(() => {
+            if (currentIndex < shuffledList.length) {
+                displayWord();
+            } else {
+                alert("Je bent klaar! Eindscore: " + score + " van de " + shuffledList.length);
+                location.reload();
+            }
+        }, 2000);
+    }
+
+    // Enter toets ondersteuning
+    document.getElementById('answer-input').addEventListener('keypress', function (e) {
+        if (e.key === 'Enter') { checkAnswer(); }
+    });
+</script>
+
+</body>
+</html>
